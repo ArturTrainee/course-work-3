@@ -29,14 +29,10 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'joda-time:joda-time:2.10.6'
-
-    runtimeOnly 'com.h2database:h2'
-//    runtimeOnly "org.postgresql:postgresql"
-
+    runtimeOnly "org.postgresql:postgresql"
     compileOnly 'org.projectlombok:lombok'
     developmentOnly "org.springframework.boot:spring-boot-devtools"
     annotationProcessor 'org.projectlombok:lombok'
-
     testImplementation 'io.rest-assured:rest-assured:3.1.1'
     testImplementation 'io.rest-assured:spring-mock-mvc:3.1.1'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -49,8 +45,8 @@ test {
     useJUnitPlatform()
 }
 
-//flyway {
-//    url = "jdbc:postgresql://localhost:5432/"
-//    user = "postgres"
-//    password = "admin"
-//}
+flyway {
+    url = "jdbc:postgresql://localhost:5432/smartreads"
+    user = "postgres"
+    password = "admin"
+}
