@@ -7,12 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
-@RequestMapping(path = "tags")
+@RequestMapping("/tags")
 public class TagsApi {
-    private TagsQueryService tagsQueryService;
+    private final TagsQueryService tagsQueryService;
 
     @Autowired
     public TagsApi(TagsQueryService tagsQueryService) {
@@ -20,9 +21,7 @@ public class TagsApi {
     }
 
     @GetMapping
-    public ResponseEntity getTags() {
-        return ResponseEntity.ok(new HashMap<String, Object>() {{
-            put("tags", tagsQueryService.allTags());
-        }});
+    public ResponseEntity<Map<String, Object>> getTags() {
+        return ResponseEntity.ok(Collections.singletonMap("tags", tagsQueryService.allTags()));
     }
 }
