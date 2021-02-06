@@ -10,20 +10,16 @@ import io.spring.infrastructure.mybatis.readservice.UserRelationshipQueryService
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class ArticleQueryService {
-    private ArticleReadService articleReadService;
-    private UserRelationshipQueryService userRelationshipQueryService;
-    private ArticleFavoritesReadService articleFavoritesReadService;
+    private final ArticleReadService articleReadService;
+    private final UserRelationshipQueryService userRelationshipQueryService;
+    private final ArticleFavoritesReadService articleFavoritesReadService;
 
     @Autowired
     public ArticleQueryService(ArticleReadService articleReadService,
@@ -35,98 +31,91 @@ public class ArticleQueryService {
     }
 
     public Optional<ArticleData> findById(String id, User user) {
-        ArticleData articleData = articleReadService.findById(id);
-        if (articleData == null) {
-            return Optional.empty();
-        } else {
-            if (user != null) {
-                fillExtraInfo(id, user, articleData);
-            }
-            return Optional.of(articleData);
-        }
+        final ArticleData articleData = articleReadService.findById(id);
+        return (articleData != null && user != null)
+                ? Optional.of(addUserInfo(id, user, articleData))
+                : Optional.empty();
     }
 
     public Optional<ArticleData> findBySlug(String slug, User user) {
-        ArticleData articleData = articleReadService.findBySlug(slug);
-        if (articleData == null) {
-            return Optional.empty();
-        } else {
-            if (user != null) {
-                fillExtraInfo(articleData.getId(), user, articleData);
-            }
-            return Optional.of(articleData);
-        }
+        final ArticleData articleData = articleReadService.findBySlug(slug);
+        return (articleData != null && user != null)
+                ? Optional.of(addUserInfo(articleData.getId(), user, articleData))
+                : Optional.empty();
     }
 
-    public ArticleDataList findRecentArticles(String tag, String author, String favoritedBy, Page page, User currentUser) {
-        List<String> articleIds = articleReadService.queryArticles(tag, author, favoritedBy, page);
+    public ArticleDataList findRecentArticles(String tag, String author, String favoritedBy, boolean isPublished,
+                                              Page page, User currentUser) {
+        final List<String> articleIds = articleReadService.queryArticles(tag, author, favoritedBy, isPublished, page);
         int articleCount = articleReadService.countArticle(tag, author, favoritedBy);
-        if (articleIds.size() == 0) {
-            return new ArticleDataList(new ArrayList<>(), articleCount);
-        } else {
-            List<ArticleData> articles = articleReadService.findArticles(articleIds);
-            fillExtraInfo(articles, currentUser);
-            return new ArticleDataList(articles, articleCount);
-        }
+        return articleIds.isEmpty()
+                ? new ArticleDataList(Collections.emptyList(), articleCount)
+                : new ArticleDataList(addUserInfo(articleReadService.findArticles(articleIds), currentUser), articleCount);
     }
 
-    private void fillExtraInfo(List<ArticleData> articles, User currentUser) {
-        setFavoriteCount(articles);
-        if (currentUser != null) {
-            setIsFavorite(articles, currentUser);
-            setIsFollowingAuthor(articles, currentUser);
-        }
-    }
-
-    private void setIsFollowingAuthor(List<ArticleData> articles, User currentUser) {
-        Set<String> followingAuthors = userRelationshipQueryService.followingAuthors(
-            currentUser.getId(),
-            articles.stream().map(articleData1 -> articleData1.getProfileData().getId()).collect(toList()));
-        articles.forEach(articleData -> {
-            if (followingAuthors.contains(articleData.getProfileData().getId())) {
-                articleData.getProfileData().setFollowing(true);
+    private List<ArticleData> addFavorites(List<ArticleData> articles, User currentUser) {
+        final Set<String> favoritedArticles = articleFavoritesReadService.userFavorites(getIds(articles), currentUser);
+        articles.forEach(article -> {
+            if (favoritedArticles.contains(article.getId())) {
+                article.setFavorited(true);
             }
         });
+        return articles;
     }
 
-    private void setFavoriteCount(List<ArticleData> articles) {
-        List<ArticleFavoriteCount> favoritesCounts = articleFavoritesReadService.articlesFavoriteCount(articles.stream().map(ArticleData::getId).collect(toList()));
-        Map<String, Integer> countMap = new HashMap<>();
-        favoritesCounts.forEach(item -> {
-            countMap.put(item.getId(), item.getCount());
-        });
-        articles.forEach(articleData -> articleData.setFavoritesCount(countMap.get(articleData.getId())));
+    private List<ArticleData> addFavoritesCount(List<ArticleData> articles) {
+        final List<ArticleFavoriteCount> favoritesCounts = articleFavoritesReadService.articlesFavoriteCount(getIds(articles));
+        final Map<String, Integer> countMap = favoritesCounts.stream()
+                .collect(toMap(ArticleFavoriteCount::getId, ArticleFavoriteCount::getCount));
+        articles.forEach(article -> article.setFavoritesCount(countMap.get(article.getId())));
+        return articles;
     }
 
-    private void setIsFavorite(List<ArticleData> articles, User currentUser) {
-        Set<String> favoritedArticles = articleFavoritesReadService.userFavorites(articles.stream().map(articleData -> articleData.getId()).collect(toList()), currentUser);
+    private List<ArticleData> addUserInfo(List<ArticleData> articles, User currentUser) {
+        return currentUser == null
+                ? addFavoritesCount(articles)
+                : addFollowedAuthors(addFavorites(articles, currentUser), currentUser);
+    }
 
-        articles.forEach(articleData -> {
-            if (favoritedArticles.contains(articleData.getId())) {
-                articleData.setFavorited(true);
+    private List<ArticleData> addFollowedAuthors(List<ArticleData> articles, User currentUser) {
+        final Set<String> followingAuthors = userRelationshipQueryService.followingAuthors(
+                currentUser.getId(),
+                articles.stream()
+                        .map(article -> article.getProfileData().getId())
+                        .collect(toList())
+        );
+        articles.forEach(article -> {
+            if (followingAuthors.contains(article.getProfileData().getId())) {
+                article.getProfileData().setFollowing(true);
             }
         });
+        return articles;
     }
 
-    private void fillExtraInfo(String id, User user, ArticleData articleData) {
+    private ArticleData addUserInfo(String id, User user, ArticleData articleData) {
         articleData.setFavorited(articleFavoritesReadService.isUserFavorite(user.getId(), id));
         articleData.setFavoritesCount(articleFavoritesReadService.articleFavoriteCount(id));
-        articleData.getProfileData().setFollowing(
-            userRelationshipQueryService.isUserFollowing(
+        articleData.getProfileData().setFollowing(userRelationshipQueryService.isUserFollowing(
                 user.getId(),
-                articleData.getProfileData().getId()));
+                articleData.getProfileData().getId())
+        );
+        return articleData;
     }
 
     public ArticleDataList findUserFeed(User user, Page page) {
-        List<String> followdUsers = userRelationshipQueryService.followedUsers(user.getId());
-        if (followdUsers.size() == 0) {
-            return new ArticleDataList(new ArrayList<>(), 0);
-        } else {
-            List<ArticleData> articles = articleReadService.findArticlesOfAuthors(followdUsers, page);
-            fillExtraInfo(articles, user);
-            int count = articleReadService.countFeedSize(followdUsers);
-            return new ArticleDataList(articles, count);
-        }
+        final List<String> followdUsers = userRelationshipQueryService.followedUsers(user.getId());
+        return followdUsers.isEmpty()
+                ? new ArticleDataList(Collections.emptyList(), 0)
+                : new ArticleDataList(
+                addUserInfo(articleReadService.findArticlesOfAuthors(followdUsers, page), user),
+                articleReadService.countFeedSize(followdUsers)
+        );
+    }
+
+    private List<String> getIds(List<ArticleData> articles) {
+        return articles.stream()
+                .map(ArticleData::getId)
+                .collect(toList());
     }
 }
 

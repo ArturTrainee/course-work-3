@@ -25,12 +25,13 @@ public class Article {
     private List<Tag> tags;
     private DateTime createdAt;
     private DateTime updatedAt;
+    private boolean isPublished;
 
-    public Article(String title, String description, String body, String[] tagList, String userId) {
-        this(title, description, body, tagList, userId, new DateTime());
+    public Article(String title, String description, String body, String[] tagList, String userId, boolean isPublished) {
+        this(title, description, body, tagList, userId, new DateTime(), isPublished);
     }
 
-    public Article(String title, String description, String body, String[] tagList, String userId, DateTime createdAt) {
+    public Article(String title, String description, String body, String[] tagList, String userId, DateTime createdAt, boolean isPublished) {
         this.id = UUID.randomUUID().toString();
         this.slug = toSlug(title);
         this.title = title;
@@ -40,9 +41,11 @@ public class Article {
         this.userId = userId;
         this.createdAt = createdAt;
         this.updatedAt = createdAt;
+        this.isPublished = isPublished;
     }
 
-    public void update(String title, String description, String body) {
+    public void update(String title, String description, String body, boolean isPublished) {
+        this.isPublished = isPublished;
         if (!"".equals(title)) {
             this.title = title;
             this.slug = toSlug(title);

@@ -13,7 +13,9 @@ public interface ArticleReadService {
 
     ArticleData findBySlug(@Param("slug") String slug);
 
-    List<String> queryArticles(@Param("tag") String tag, @Param("author") String author, @Param("favoritedBy") String favoritedBy, @Param("page") Page page);
+    List<String> queryArticles(@Param("tag") String tag, @Param("author") String author,
+                               @Param("favoritedBy") String favoritedBy, @Param("isPublished") boolean isPublished,
+                               @Param("page") Page page);
 
     int countArticle(@Param("tag") String tag, @Param("author") String author, @Param("favoritedBy") String favoritedBy);
 
