@@ -57,6 +57,11 @@ export default new Router({
           name: "profile-favorites",
           path: "favorites",
           component: () => import("@/views/ProfileFavorited")
+        },
+        {
+          name: "profile-drafts",
+          path: "drafts",
+          component: () => import("@/views/ProfileDrafts")
         }
       ]
     },

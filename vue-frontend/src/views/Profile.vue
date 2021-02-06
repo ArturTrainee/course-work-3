@@ -58,6 +58,16 @@
                   class="nav-link"
                   active-class="active"
                   exact
+                  :to="{ name: 'profile-drafts' }"
+                >
+                  My Drafts
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link
+                  class="nav-link"
+                  active-class="active"
+                  exact
                   :to="{ name: 'profile-favorites' }"
                 >
                   Favorited Articles

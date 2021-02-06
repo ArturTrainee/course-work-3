@@ -56,9 +56,10 @@ export const TagsService = {
 
 export const ArticlesService = {
   query(type, params) {
-    return ApiService.query("articles" + (type === "feed" ? "/feed" : ""), {
-      params: params
-    });
+    if (type === "drafts") {
+      params.isPublished = false;
+    }
+    return ApiService.query("articles" + (type === "feed" ? "/feed" : ""), params);
   },
   get(slug) {
     return ApiService.get("articles", slug);
