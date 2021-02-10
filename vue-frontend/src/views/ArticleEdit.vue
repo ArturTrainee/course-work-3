@@ -7,6 +7,7 @@
           <form @submit.prevent="onPublish(article.slug)">
             <fieldset :disabled="inProgress">
               <fieldset class="form-group">
+                <legend />
                 <input
                   type="text"
                   class="form-control form-control-lg"
@@ -15,6 +16,7 @@
                 />
               </fieldset>
               <fieldset class="form-group">
+                <legend />
                 <input
                   type="text"
                   class="form-control"
@@ -23,6 +25,7 @@
                 />
               </fieldset>
               <fieldset class="form-group">
+                <legend />
                 <textarea
                   class="form-control"
                   rows="8"
@@ -32,6 +35,7 @@
                 </textarea>
               </fieldset>
               <fieldset class="form-group">
+                <legend />
                 <input
                   type="text"
                   class="form-control"
@@ -45,18 +49,26 @@
                     v-for="(tag, index) of article.tagList"
                     :key="tag + index"
                   >
-                    <i class="ion-close-round" @click="removeTag(tag)"> </i>
+                    <em class="ion-close-round" @click="removeTag(tag)" />
                     {{ tag }}
                   </span>
                 </div>
               </fieldset>
             </fieldset>
             <button
-              :disabled="inProgress"
-              class="btn btn-lg pull-xs-right btn-primary"
+              :disabled="!(article.title && article.description && article.body) || inProgress"
+              class="btn btn-lg pull-xs-right btn-success"
               type="submit"
             >
               Publish Article
+            </button>
+            <button
+              :disabled="!article.title || inProgress"
+              class="btn btn-lg pull-xs-right btn-primary"
+              type="button"
+              @click="onSaveArticleDraft(article.slug)"
+            >
+              Save as Draft
             </button>
           </form>
         </div>
@@ -75,7 +87,9 @@ import {
   FETCH_ARTICLE,
   ARTICLE_EDIT_ADD_TAG,
   ARTICLE_EDIT_REMOVE_TAG,
-  ARTICLE_RESET_STATE
+  ARTICLE_RESET_STATE,
+  ARTICLE_CREATE_DRAFT,
+  ARTICLE_EDIT_DRAFT
 } from "@/store/actions.type";
 
 export default {
@@ -94,7 +108,6 @@ export default {
     return next();
   },
   async beforeRouteEnter(to, from, next) {
-    // SO: https://github.com/vuejs/vue-router/issues/1034
     // If we arrive directly to this url, we need to fetch the article
     await store.dispatch(ARTICLE_RESET_STATE);
     if (to.params.slug !== undefined) {
@@ -122,7 +135,27 @@ export default {
   },
   methods: {
     onPublish(slug) {
+      console.log(slug);
       let action = slug ? ARTICLE_EDIT : ARTICLE_PUBLISH;
+      this.inProgress = true;
+      this.$store
+        .dispatch(action)
+        .then(({ data }) => {
+          this.inProgress = false;
+          this.$router.push({
+            name: "article",
+            params: { slug: data.article.slug }
+          });
+        })
+        .catch(({ response }) => {
+          this.inProgress = false;
+          this.errors = response.data.errors;
+        });
+    },
+    onSaveArticleDraft(slug) {
+      console.log(slug);
+      let action = slug ? ARTICLE_EDIT_DRAFT : ARTICLE_CREATE_DRAFT;
+      this.article.isPublished = false;
       this.inProgress = true;
       this.$store
         .dispatch(action)

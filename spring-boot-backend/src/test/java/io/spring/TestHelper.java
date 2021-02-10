@@ -17,7 +17,7 @@ public class TestHelper {
             "title-" + seed,
             "title " + seed,
             "desc " + seed,
-            "body " + seed, false, 0, now, now, new ArrayList<>(),
+            "body " + seed, false, true, 0, now, now, new ArrayList<>(),
             new ProfileData(user.getId(), user.getUsername(), user.getBio(), user.getImage(), false));
     }
 
@@ -29,6 +29,7 @@ public class TestHelper {
             article.getDescription(),
             article.getBody(),
             false,
+            true,
             0,
             article.getCreatedAt(),
             article.getUpdatedAt(),

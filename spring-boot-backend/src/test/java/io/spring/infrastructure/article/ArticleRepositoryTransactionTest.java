@@ -33,13 +33,13 @@ public class ArticleRepositoryTransactionTest {
     public void transactional_test() {
         User user = new User("aisensiy@gmail.com", "aisensiy", "123", "bio", "default");
         userRepository.save(user);
-        Article article = new Article("test", "desc", "body", new String[]{"java", "spring"}, user.getId());
+        Article article = new Article("test", "desc", "body", new String[]{"java", "spring"}, user.getId(), true);
         articleRepository.save(article);
-        Article anotherArticle = new Article("test", "desc", "body", new String[]{"java", "spring", "other"}, user.getId());
+        Article anotherArticle = new Article("test", "desc", "body", new String[]{"java", "spring", "other"}, user.getId(), true);
         try {
             articleRepository.save(anotherArticle);
         } catch (Exception e) {
-            assertNull(articleMapper.findTag("other"));
+            assertNull(articleMapper.findTag("other").get());
         }
     }
 

@@ -17,14 +17,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "articles/{slug}/favorite")
 public class ArticleFavoriteApi {
-    private ArticleFavoriteRepository articleFavoriteRepository;
-    private ArticleRepository articleRepository;
-    private ArticleQueryService articleQueryService;
+    private final ArticleFavoriteRepository articleFavoriteRepository;
+    private final ArticleRepository articleRepository;
+    private final ArticleQueryService articleQueryService;
 
     @Autowired
     public ArticleFavoriteApi(ArticleFavoriteRepository articleFavoriteRepository,
@@ -36,32 +37,31 @@ public class ArticleFavoriteApi {
     }
 
     @PostMapping
-    public ResponseEntity favoriteArticle(@PathVariable("slug") String slug,
-                                          @AuthenticationPrincipal User user) {
-        Article article = getArticle(slug);
-        ArticleFavorite articleFavorite = new ArticleFavorite(article.getId(), user.getId());
+    public ResponseEntity<Map<String, ArticleData>> favoriteArticle(@PathVariable("slug") String slug,
+                                                                    @AuthenticationPrincipal User user) {
+        final Article article = getArticle(slug);
+        final var articleFavorite = new ArticleFavorite(article.getId(), user.getId());
         articleFavoriteRepository.save(articleFavorite);
-        return responseArticleData(articleQueryService.findBySlug(slug, user).get());
+        return articleQueryService.findBySlug(slug, user)
+                .map(this::responseArticleData)
+                .orElse(ResponseEntity.badRequest().body(Collections.emptyMap()));
     }
 
     @DeleteMapping
-    public ResponseEntity unfavoriteArticle(@PathVariable("slug") String slug,
-                                            @AuthenticationPrincipal User user) {
-        Article article = getArticle(slug);
-        articleFavoriteRepository.find(article.getId(), user.getId()).ifPresent(favorite -> {
-            articleFavoriteRepository.remove(favorite);
-        });
-        return responseArticleData(articleQueryService.findBySlug(slug, user).get());
+    public ResponseEntity<Map<String, ArticleData>> unfavoriteArticle(@PathVariable("slug") String slug,
+                                                                      @AuthenticationPrincipal User user) {
+        articleFavoriteRepository.find(getArticle(slug).getId(), user.getId())
+                .ifPresent(articleFavoriteRepository::remove);
+        return articleQueryService.findBySlug(slug, user)
+                .map(this::responseArticleData)
+                .orElse(ResponseEntity.badRequest().body(Collections.emptyMap()));
     }
 
-    private ResponseEntity<HashMap<String, Object>> responseArticleData(final ArticleData articleData) {
-        return ResponseEntity.ok(new HashMap<String, Object>() {{
-            put("article", articleData);
-        }});
+    private ResponseEntity<Map<String, ArticleData>> responseArticleData(final ArticleData articleData) {
+        return ResponseEntity.ok(Collections.singletonMap("article", articleData));
     }
 
     private Article getArticle(String slug) {
-        return articleRepository.findBySlug(slug).map(article -> article)
-            .orElseThrow(ResourceNotFoundException::new);
+        return articleRepository.findBySlug(slug).orElseThrow(ResourceNotFoundException::new);
     }
 }

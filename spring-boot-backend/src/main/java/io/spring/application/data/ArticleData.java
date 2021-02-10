@@ -18,6 +18,7 @@ public class ArticleData {
     private String description;
     private String body;
     private boolean favorited;
+    private boolean isPublished;
     private int favoritesCount;
     private DateTime createdAt;
     private DateTime updatedAt;

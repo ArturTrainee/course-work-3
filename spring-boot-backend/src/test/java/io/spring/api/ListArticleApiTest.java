@@ -44,7 +44,7 @@ public class ListArticleApiTest extends TestWithCurrentUser {
     public void should_get_default_article_list() throws Exception {
         ArticleDataList articleDataList = new ArticleDataList(
             asList(articleDataFixture("1", user), articleDataFixture("2", user)), 2);
-        when(articleQueryService.findRecentArticles(eq(null), eq(null), eq(null), eq(new Page(0, 20)), eq(null))).thenReturn(articleDataList);
+        when(articleQueryService.findRecentArticles(eq(null), eq(null), eq(null), true, eq(new Page(0, 20)), eq(null))).thenReturn(articleDataList);
         RestAssuredMockMvc.when()
             .get("/articles")
             .prettyPeek()
