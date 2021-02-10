@@ -20,7 +20,7 @@ const getters = {
 const actions = {
   [FETCH_PROFILE](context, payload) {
     const { username } = payload;
-    return ApiService.get("profiles", username)
+    return ApiService.get(`profiles/${username}`)
       .then(({ data }) => {
         context.commit(SET_PROFILE, data.profile);
         return data;

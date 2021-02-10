@@ -16,7 +16,9 @@ import {
   ARTICLE_EDIT_ADD_TAG,
   ARTICLE_EDIT_REMOVE_TAG,
   ARTICLE_DELETE,
-  ARTICLE_RESET_STATE
+  ARTICLE_RESET_STATE,
+  ARTICLE_CREATE_DRAFT,
+  ARTICLE_EDIT_DRAFT
 } from "./actions.type";
 import {
   RESET_STATE,
@@ -33,7 +35,8 @@ const initialState = {
     title: "",
     description: "",
     body: "",
-    tagList: []
+    tagList: [],
+    isPublished: true
   },
   comments: []
 };
@@ -77,11 +80,17 @@ export const actions = {
   [ARTICLE_PUBLISH]({ state }) {
     return ArticlesService.create(state.article);
   },
+  [ARTICLE_CREATE_DRAFT]({ state }) {
+    return ArticlesService.createDraft(state.article);
+  },
   [ARTICLE_DELETE](context, slug) {
     return ArticlesService.destroy(slug);
   },
   [ARTICLE_EDIT]({ state }) {
     return ArticlesService.update(state.article.slug, state.article);
+  },
+  [ARTICLE_EDIT_DRAFT]({ state }) {
+    return ArticlesService.updateDraft(state.article.slug, state.article);
   },
   [ARTICLE_EDIT_ADD_TAG](context, tag) {
     context.commit(TAG_ADD, tag);

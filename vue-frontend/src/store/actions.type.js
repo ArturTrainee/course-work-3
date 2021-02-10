@@ -1,4 +1,6 @@
 export const ARTICLE_PUBLISH = "publishArticle";
+export const ARTICLE_CREATE_DRAFT = "createArticleDraft";
+export const ARTICLE_EDIT_DRAFT = "editArticleDraft";
 export const ARTICLE_DELETE = "deleteArticle";
 export const ARTICLE_EDIT = "editArticle";
 export const ARTICLE_EDIT_ADD_TAG = "addTagToArticle";

@@ -39,7 +39,7 @@ public class MyBatisArticleRepositoryTest {
     public void setUp() {
         User user = new User("aisensiy@gmail.com", "aisensiy", "123", "bio", "default");
         userRepository.save(user);
-        article = new Article("test", "desc", "body", new String[]{"java", "spring"}, user.getId());
+        article = new Article("test", "desc", "body", new String[]{"java", "spring"}, user.getId(), true);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class MyBatisArticleRepositoryTest {
         articleRepository.save(article);
 
         String newTitle = "new test 2";
-        article.update(newTitle, "", "");
+        article.update(newTitle, "", "", true);
         articleRepository.save(article);
         System.out.println(article.getSlug());
         Optional<Article> optional = articleRepository.findBySlug(article.getSlug());

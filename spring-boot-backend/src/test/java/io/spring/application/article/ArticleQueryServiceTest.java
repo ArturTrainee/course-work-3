@@ -57,7 +57,7 @@ public class ArticleQueryServiceTest {
     public void setUp() {
         user = new User("aisensiy@gmail.com", "aisensiy", "123", "", "");
         userRepository.save(user);
-        article = new Article("test", "desc", "body", new String[]{"java", "spring"}, user.getId(), new DateTime());
+        article = new Article("test", "desc", "body", new String[]{"java", "spring"}, user.getId(), new DateTime(), true);
         articleRepository.save(article);
     }
 
@@ -90,15 +90,15 @@ public class ArticleQueryServiceTest {
 
     @Test
     public void should_get_default_article_list() {
-        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, user.getId(), new DateTime().minusHours(1));
+        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, user.getId(), new DateTime().minusHours(1), true);
         articleRepository.save(anotherArticle);
 
-        ArticleDataList recentArticles = queryService.findRecentArticles(null, null, null, new Page(), user);
+        ArticleDataList recentArticles = queryService.findRecentArticles(null, null, null,true, new Page(), user);
         assertEquals(recentArticles.getCount(), 2);
         assertEquals(recentArticles.getArticleDatas().size(), 2);
         assertEquals(recentArticles.getArticleDatas().get(0).getId(), article.getId());
 
-        ArticleDataList nodata = queryService.findRecentArticles(null, null, null, new Page(2, 10), user);
+        ArticleDataList nodata = queryService.findRecentArticles(null, null, null,true, new Page(2, 10), user);
         assertEquals(nodata.getCount(),2);
         assertEquals(nodata.getArticleDatas().size(), 0);
     }
@@ -108,10 +108,10 @@ public class ArticleQueryServiceTest {
         User anotherUser = new User("other@email.com", "other", "123", "", "");
         userRepository.save(anotherUser);
 
-        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, anotherUser.getId());
+        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, anotherUser.getId(), true);
         articleRepository.save(anotherArticle);
 
-        ArticleDataList recentArticles = queryService.findRecentArticles(null, user.getUsername(), null, new Page(), user);
+        ArticleDataList recentArticles = queryService.findRecentArticles(null, user.getUsername(), null, true, new Page(), user);
         assertEquals(recentArticles.getArticleDatas().size(), 1);
         assertEquals(recentArticles.getCount(), 1);
     }
@@ -121,13 +121,13 @@ public class ArticleQueryServiceTest {
         User anotherUser = new User("other@email.com", "other", "123", "", "");
         userRepository.save(anotherUser);
 
-        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, anotherUser.getId());
+        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, anotherUser.getId(), true);
         articleRepository.save(anotherArticle);
 
         ArticleFavorite articleFavorite = new ArticleFavorite(article.getId(), anotherUser.getId());
         articleFavoriteRepository.save(articleFavorite);
 
-        ArticleDataList recentArticles = queryService.findRecentArticles(null, null, anotherUser.getUsername(), new Page(), anotherUser);
+        ArticleDataList recentArticles = queryService.findRecentArticles(null, null, anotherUser.getUsername(), true, new Page(), anotherUser);
         assertEquals(recentArticles.getArticleDatas().size(), 1);
         assertEquals(recentArticles.getCount(), 1);
         ArticleData articleData = recentArticles.getArticleDatas().get(0);
@@ -138,15 +138,15 @@ public class ArticleQueryServiceTest {
 
     @Test
     public void should_query_article_by_tag() {
-        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, user.getId());
+        Article anotherArticle = new Article("new article", "desc", "body", new String[]{"test"}, user.getId(), true);
         articleRepository.save(anotherArticle);
 
-        ArticleDataList recentArticles = queryService.findRecentArticles("spring", null, null, new Page(), user);
+        ArticleDataList recentArticles = queryService.findRecentArticles("spring", null, null, true, new Page(), user);
         assertEquals(recentArticles.getArticleDatas().size(), 1);
         assertEquals(recentArticles.getCount(), 1);
         assertEquals(recentArticles.getArticleDatas().get(0).getId(), article.getId());
 
-        ArticleDataList notag = queryService.findRecentArticles("notag", null, null, new Page(), user);
+        ArticleDataList notag = queryService.findRecentArticles("notag", null, null, true, new Page(), user);
         assertEquals(notag.getCount(), 0);
     }
 
@@ -158,7 +158,7 @@ public class ArticleQueryServiceTest {
         FollowRelation followRelation = new FollowRelation(anotherUser.getId(), user.getId());
         userRepository.saveRelation(followRelation);
 
-        ArticleDataList recentArticles = queryService.findRecentArticles(null, null, null, new Page(), anotherUser);
+        ArticleDataList recentArticles = queryService.findRecentArticles(null, null, null, true, new Page(), anotherUser);
         assertEquals(recentArticles.getCount(), 1);
         ArticleData articleData = recentArticles.getArticleDatas().get(0);
         assertTrue(articleData.getProfileData().isFollowing());

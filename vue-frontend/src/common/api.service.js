@@ -8,37 +8,25 @@ const ApiService = {
     Vue.use(VueAxios, axios);
     Vue.axios.defaults.baseURL = process.env.VUE_APP_API_URL;
   },
-
   setHeader() {
-    Vue.axios.defaults.headers.common[
-      "Authorization"
-    ] = `Token ${JwtService.getToken()}`;
+    Vue.axios.defaults.headers.common["Authorization"] = `Token ${JwtService.getToken()}`;
   },
-
   query(resource, params) {
     return Vue.axios.get(resource, params).catch(error => {
       throw new Error(`[RWV] ApiService ${error}`);
     });
   },
-
-  get(resource, name = "") {
-    return Vue.axios.get(`${resource}${name ? ("/" + name) : ""}`).catch(error => {
+  get(resource) {
+    return Vue.axios.get(resource).catch(error => {
       throw new Error(`[RWV] ApiService ${error}`);
     });
   },
-
   post(resource, params) {
-    return Vue.axios.post(`${resource}`, params);
+    return Vue.axios.post(resource, params);
   },
-
-  update(resource, slug, params) {
-    return Vue.axios.put(`${resource}/${slug}`, params);
-  },
-
   put(resource, params) {
-    return Vue.axios.put(`${resource}`, params);
+    return Vue.axios.put(resource, params);
   },
-
   delete(resource) {
     return Vue.axios.delete(resource).catch(error => {
       throw new Error(`[RWV] ApiService ${error}`);
@@ -56,18 +44,23 @@ export const TagsService = {
 
 export const ArticlesService = {
   query(type, params) {
-    return ApiService.query("articles" + (type === "feed" ? "/feed" : ""), {
-      params: params
-    });
+    params.isPublished = (type !== "drafts");
+    return ApiService.query("articles" + (type === "feed" ? "/feed" : ""), { params });
   },
   get(slug) {
-    return ApiService.get("articles", slug);
+    return ApiService.get(`articles/${slug}`);
   },
   create(params) {
     return ApiService.post("articles", { article: params });
   },
+  createDraft(params) {
+    return ApiService.post("articles/draft", { article: params });
+  },
   update(slug, params) {
-    return ApiService.update("articles", slug, { article: params });
+    return ApiService.put(`articles/${slug}`, { article: params });
+  },
+  updateDraft(slug, params) {
+    return ApiService.put(`articles/draft/${slug}`, { article: params });
   },
   destroy(slug) {
     return ApiService.delete(`articles/${slug}`);
@@ -81,15 +74,13 @@ export const CommentsService = {
         "[RWV] CommentsService.get() article slug required to fetch comments"
       );
     }
-    return ApiService.get("articles", `${slug}/comments`);
+    return ApiService.get(`articles/${slug}/comments`);
   },
-
   post(slug, payload) {
     return ApiService.post(`articles/${slug}/comments`, {
       comment: { body: payload }
     });
   },
-
   destroy(slug, commentId) {
     return ApiService.delete(`articles/${slug}/comments/${commentId}`);
   }

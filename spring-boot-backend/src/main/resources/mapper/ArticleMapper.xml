@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.spring.infrastructure.mybatis.mapper.ArticleMapper">
     <insert id="insert">
-        insert into articles(id, slug, title, description, body, user_id, created_at, updated_at)
+        insert into articles(id, slug, title, description, body, user_id, created_at, updated_at, is_published)
         values(
           #{article.id},
           #{article.slug},
@@ -11,7 +11,8 @@
           #{article.body},
           #{article.userId},
           #{article.createdAt},
-          #{article.updatedAt})
+          #{article.updatedAt},
+          #{article.isPublished})
     </insert>
     <insert id="insertTag">
         insert into tags (id, name) values (#{tag.id}, #{tag.name})
@@ -21,12 +22,11 @@
     </insert>
     <update id="update">
         update articles
-          <set>
-              <if test="article.title != ''">title = #{article.title},</if>
-              <if test="article.title != ''">slug = #{article.slug},</if>
-              <if test="article.description != ''">description = #{article.description},</if>
-              <if test="article.body != ''">body = #{article.body}</if>
-          </set>
+        set is_published = #{article.isPublished}
+          <if test="article.title != ''">, title = #{article.title}</if>
+          <if test="article.slug != ''">, slug = #{article.slug}</if>
+          <if test="article.description != ''">, description = #{article.description}</if>
+          <if test="article.body != ''">, body = #{article.body}</if>
         where id = #{article.id}
     </update>
     <delete id="delete">
@@ -42,11 +42,12 @@
         A.user_id articleUserId,
         A.created_at articleCreatedAt,
         A.updated_at articleUpdatedAt,
+        A.is_published isPublished,
         T.id tagId,
         T.name tagName
-        from articles A
-        left join article_tags AT on A.id = AT.article_id
-        left join tags T on T.id = AT.tag_id
+        from articles as A
+            left join article_tags AT on A.id = AT.article_id
+            left join tags T on T.id = AT.tag_id
     </sql>
 
     <select id="findById" resultMap="article">
@@ -72,6 +73,7 @@
         <result column="articleBody" property="body"/>
         <result column="articleCreatedAt" property="createdAt"/>
         <result column="articleUpdatedAt" property="updatedAt"/>
+        <result column="articleIsPublished" property="isPublished"/>
         <collection property="tags" ofType="arraylist" resultMap="tag"/>
     </resultMap>
 

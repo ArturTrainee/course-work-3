@@ -5,19 +5,21 @@ import io.spring.core.article.Tag;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Optional;
+
 @Mapper
 public interface ArticleMapper {
     void insert(@Param("article") Article article);
 
-    Article findById(@Param("id") String id);
+    Optional<Article> findById(@Param("id") String id);
 
-    Tag findTag(@Param("tagName") String tagName);
+    Optional<Tag> findTag(@Param("tagName") String tagName);
 
     void insertTag(@Param("tag") Tag tag);
 
     void insertArticleTagRelation(@Param("articleId") String articleId, @Param("tagId") String tagId);
 
-    Article findBySlug(@Param("slug") String slug);
+    Optional<Article> findBySlug(@Param("slug") String slug);
 
     void update(@Param("article") Article article);
 
