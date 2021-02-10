@@ -26,12 +26,22 @@ public class Article {
     private DateTime createdAt;
     private DateTime updatedAt;
     private boolean isPublished;
+    private static final String EMPTY_STRING = "";
+
+    public Article(String title, String description, String body, String[] tagList, String userId) {
+        this(title, description, body, tagList, userId, new DateTime(), true);
+    }
+
+    public Article(String title, String description, String body, String[] tagList, String userId, DateTime createdAt) {
+        this(title, description, body, tagList, userId, createdAt, true);
+    }
 
     public Article(String title, String description, String body, String[] tagList, String userId, boolean isPublished) {
         this(title, description, body, tagList, userId, new DateTime(), isPublished);
     }
 
-    public Article(String title, String description, String body, String[] tagList, String userId, DateTime createdAt, boolean isPublished) {
+    public Article(String title, String description, String body, String[] tagList, String userId, DateTime createdAt,
+                   boolean isPublished) {
         this.id = UUID.randomUUID().toString();
         this.slug = toSlug(title);
         this.title = title;
@@ -46,14 +56,14 @@ public class Article {
 
     public void update(String title, String description, String body, boolean isPublished) {
         this.isPublished = isPublished;
-        if (!"".equals(title)) {
+        if (!title.equals(EMPTY_STRING)) {
             this.title = title;
             this.slug = toSlug(title);
         }
-        if (!"".equals(description)) {
+        if (!description.equals(EMPTY_STRING)) {
             this.description = description;
         }
-        if (!"".equals(body)) {
+        if (!body.equals(EMPTY_STRING)) {
             this.body = body;
         }
         this.updatedAt = new DateTime();
