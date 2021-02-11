@@ -43,7 +43,10 @@ export const TagsService = {
 };
 
 export const ArticlesService = {
-  query(type, params) {
+  query(type, params, username) {
+    if (type === "history") {
+      return ApiService.query(`profiles/${username}/history`, { params });
+    }
     params.isPublished = (type !== "drafts");
     return ApiService.query("articles" + (type === "feed" ? "/feed" : ""), { params });
   },

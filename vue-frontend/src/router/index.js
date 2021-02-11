@@ -61,6 +61,11 @@ const routes = [
         name: "profile-drafts",
         path: "drafts",
         component: () => import("@/views/ProfileDrafts")
+      },
+      {
+        name: "profile-recently-viewed",
+        path: "recent",
+        component: () => import("@/views/RecentlyViewed")
       }
     ]
   },
