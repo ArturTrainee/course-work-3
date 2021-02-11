@@ -19,4 +19,6 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+  @import "../public/css/custom-bootstrap4.css";
+</style>
