@@ -117,5 +117,12 @@ public class ArticleQueryService {
                 .map(ArticleData::getId)
                 .collect(toList());
     }
+
+    public ArticleDataList findByUserViews(User currentUser, Page page) {
+        final List<ArticleData> articles = articleReadService.findByUserViews(currentUser.getId(), page);
+        return articles.isEmpty()
+                ? new ArticleDataList(Collections.emptyList(), 0)
+                : new ArticleDataList(articles, articles.size());
+    }
 }
 
