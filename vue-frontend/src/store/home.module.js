@@ -32,7 +32,7 @@ const getters = {
 const actions = {
   [FETCH_ARTICLES]({ commit }, params) {
     commit(FETCH_START);
-    return ArticlesService.query(params.type, params.filters)
+    return ArticlesService.query(params.type, params.filters, params.username)
       .then(({ data }) => {
         commit(FETCH_END, data);
       })

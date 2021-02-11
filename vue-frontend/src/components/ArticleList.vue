@@ -19,7 +19,7 @@
 import { mapGetters } from "vuex";
 import RwvArticlePreview from "./VArticlePreview";
 import VPagination from "./VPagination";
-import { FETCH_ARTICLES } from "../store/actions.type";
+import { FETCH_ARTICLES } from "@/store/actions.type";
 
 export default {
   name: "RwvArticleList",
@@ -74,7 +74,8 @@ export default {
       }
       return {
         type,
-        filters
+        filters,
+        username: this.$route.params.username
       };
     },
     pages() {

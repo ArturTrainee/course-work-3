@@ -18,11 +18,10 @@
         A.updated_at articleUpdatedAt,
         T.name tagName,
         <include refid="profileColumns"/>
-        from
-        articles A
-        left join article_tags AT on A.id = AT.article_id
-        left join tags T on T.id = AT.tag_id
-        left join users U on U.id = A.user_id
+        from articles A
+            left join article_tags AT on A.id = AT.article_id
+            left join tags T on T.id = AT.tag_id
+            left join users U on U.id = A.user_id
     </sql>
 
     <select id="findById" resultMap="transfer.data.articleData">
@@ -95,6 +94,13 @@
         <foreach collection="authors" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
+    </select>
+    <select id="findByUserViews" resultMap="transfer.data.articleData">
+        <include refid="selectArticleData"/>
+            left join reading_histories RH on RH.article_id = A.id
+        where RH.user_id = #{userId}
+        order by RH.last_read_at desc
+        limit #{page.limit} offset #{page.offset}
     </select>
 
     <resultMap id="articleId" type="string">

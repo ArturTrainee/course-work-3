@@ -4,7 +4,7 @@
       <div class="container">
         <div class="row">
           <div class="col-xs-12 col-md-10 offset-md-1">
-            <img :src="profile.image" class="user-img" />
+            <img :src="profile.image" class="user-img" alt="profile image"/>
             <h4>{{ profile.username }}</h4>
             <p>{{ profile.bio }}</p>
             <div v-if="isCurrentUser()">
@@ -71,6 +71,16 @@
                   :to="{ name: 'profile-favorites' }"
                 >
                   Favorited Articles
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link
+                  class="nav-link"
+                  active-class="active"
+                  exact
+                  :to="{ name: 'profile-recently-viewed' }"
+                >
+                  Recently Viewed
                 </router-link>
               </li>
             </ul>

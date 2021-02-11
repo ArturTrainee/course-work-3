@@ -24,4 +24,6 @@ public interface ArticleReadService {
     List<ArticleData> findArticlesOfAuthors(@Param("authors") List<String> authors, @Param("page") Page page);
 
     int countFeedSize(@Param("authors") List<String> authors);
+
+    List<ArticleData> findByUserViews(@Param("userId") String userId, @Param("page") Page page);
 }
