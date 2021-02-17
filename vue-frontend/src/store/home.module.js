@@ -1,15 +1,17 @@
 import { TagsService, ArticlesService } from "@/common/api.service";
-import { FETCH_ARTICLES, FETCH_TAGS } from "./actions.type";
+import { FETCH_ARTICLES, FETCH_TAGS, FETCH_TRENDING_ARTICLES } from "./actions.type";
 import {
   FETCH_START,
   FETCH_END,
   SET_TAGS,
-  UPDATE_ARTICLE_IN_LIST
+  UPDATE_ARTICLE_IN_LIST,
+  TRENDING_FETCH_END
 } from "./mutations.type";
 
 const state = {
   tags: [],
   articles: [],
+  trendingArticles: [],
   isLoading: true,
   articlesCount: 0
 };
@@ -20,6 +22,9 @@ const getters = {
   },
   articles(state) {
     return state.articles;
+  },
+  trendingArticles(state) {
+    return state.trendingArticles;
   },
   isLoading(state) {
     return state.isLoading;
@@ -35,6 +40,16 @@ const actions = {
     return ArticlesService.query(params.type, params.filters, params.username)
       .then(({ data }) => {
         commit(FETCH_END, data);
+      })
+      .catch(error => {
+        throw new Error(error);
+      });
+  },
+  [FETCH_TRENDING_ARTICLES]({ commit }, params) {
+    commit(FETCH_START);
+    return ArticlesService.getTrending(params)
+      .then(({ data }) => {
+        commit(TRENDING_FETCH_END, data);
       })
       .catch(error => {
         throw new Error(error);
@@ -58,6 +73,11 @@ const mutations = {
   },
   [FETCH_END](state, { articles, articlesCount }) {
     state.articles = articles;
+    state.articlesCount = articlesCount;
+    state.isLoading = false;
+  },
+  [TRENDING_FETCH_END](state, { articles, articlesCount }) {
+    state.trendingArticles = articles;
     state.articlesCount = articlesCount;
     state.isLoading = false;
   },

@@ -1,4 +1,5 @@
 export const FETCH_END = "setArticles";
+export const TRENDING_FETCH_END = "setTrendingArticles";
 export const FETCH_START = "setLoading";
 export const PURGE_AUTH = "logOut";
 export const SET_ARTICLE = "setArticle";

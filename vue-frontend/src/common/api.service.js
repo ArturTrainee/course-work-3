@@ -53,6 +53,9 @@ export const ArticlesService = {
   get(slug) {
     return ApiService.get(`articles/${slug}`);
   },
+  getTrending(params) {
+    return ApiService.query("articles/trending", { params });
+  },
   create(params) {
     return ApiService.post("articles", { article: params });
   },
