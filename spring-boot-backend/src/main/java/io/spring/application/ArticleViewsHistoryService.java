@@ -16,10 +16,10 @@ public class ArticleViewsHistoryService {
     }
 
     public void save(String userId, String articleId) {
-        if (this.articleViewsHistoryMapper.isViewExists(userId, articleId)) {
-            this.articleViewsHistoryMapper.update(userId, articleId, new DateTime());
-        } else {
+        if (!this.articleViewsHistoryMapper.isViewExists(userId, articleId)) {
             this.articleViewsHistoryMapper.insert(userId, articleId, new DateTime());
+        } else {
+            this.articleViewsHistoryMapper.update(userId, articleId, new DateTime());
         }
     }
 

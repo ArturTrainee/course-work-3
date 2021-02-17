@@ -37,14 +37,12 @@ public class ArticleApi {
     @GetMapping
     public ResponseEntity<Map<String, ArticleData>> article(@PathVariable("slug") String slug,
                                                             @AuthenticationPrincipal User user) {
-        final Optional<ArticleData> article = this.articleQueryService.findBySlug(slug, user);
-        if (article.isPresent()) {
+        return this.articleQueryService.findBySlug(slug, user).map(article-> {
             if (user != null) {
-                this.articleViewsHistoryService.save(user.getId(), article.get().getId());
+                this.articleViewsHistoryService.save(user.getId(), article.getId());
             }
-            return ResponseEntity.ok(Collections.singletonMap("article", article.get()));
-        }
-        return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(Collections.singletonMap("article", article));
+        }).orElseThrow(ResourceNotFoundException::new);
     }
 
     @PutMapping
