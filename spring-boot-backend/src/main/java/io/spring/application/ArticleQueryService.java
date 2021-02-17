@@ -53,6 +53,30 @@ public class ArticleQueryService {
                 : new ArticleDataList(addUserInfo(articleReadService.findArticles(articleIds), currentUser), articleCount);
     }
 
+    public ArticleDataList findUserFeed(User user, Page page) {
+        final List<String> followdUsers = userRelationshipQueryService.followedUsers(user.getId());
+        return followdUsers.isEmpty()
+                ? new ArticleDataList(Collections.emptyList(), 0)
+                : new ArticleDataList(
+                addUserInfo(articleReadService.findArticlesOfAuthors(followdUsers, page), user),
+                articleReadService.countFeedSize(followdUsers)
+        );
+    }
+
+    public ArticleDataList findByUserViews(User currentUser, Page page) {
+        final List<ArticleData> articles = articleReadService.findByUserViewHistory(currentUser.getId(), page);
+        return articles.isEmpty()
+                ? new ArticleDataList(Collections.emptyList(), 0)
+                : new ArticleDataList(articles, articles.size());
+    }
+
+    public ArticleDataList findTrending(Page page) {
+        final List<ArticleData> articles =  articleReadService.findRecentlyMostViewed(page);
+        return articles.isEmpty()
+                ? new ArticleDataList(Collections.emptyList(), 0)
+                : new ArticleDataList(articles, articles.size());
+    }
+
     private List<ArticleData> addFavorites(List<ArticleData> articles, User currentUser) {
         final Set<String> favoritedArticles = articleFavoritesReadService.userFavorites(getIds(articles), currentUser);
         articles.forEach(article -> {
@@ -102,27 +126,10 @@ public class ArticleQueryService {
         return articleData;
     }
 
-    public ArticleDataList findUserFeed(User user, Page page) {
-        final List<String> followdUsers = userRelationshipQueryService.followedUsers(user.getId());
-        return followdUsers.isEmpty()
-                ? new ArticleDataList(Collections.emptyList(), 0)
-                : new ArticleDataList(
-                addUserInfo(articleReadService.findArticlesOfAuthors(followdUsers, page), user),
-                articleReadService.countFeedSize(followdUsers)
-        );
-    }
-
     private List<String> getIds(List<ArticleData> articles) {
         return articles.stream()
                 .map(ArticleData::getId)
                 .collect(toList());
-    }
-
-    public ArticleDataList findByUserViews(User currentUser, Page page) {
-        final List<ArticleData> articles = articleReadService.findByUserViews(currentUser.getId(), page);
-        return articles.isEmpty()
-                ? new ArticleDataList(Collections.emptyList(), 0)
-                : new ArticleDataList(articles, articles.size());
     }
 }
 

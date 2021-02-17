@@ -95,11 +95,17 @@
             #{id}
         </foreach>
     </select>
-    <select id="findByUserViews" resultMap="transfer.data.articleData">
+    <select id="findByUserViewHistory" resultMap="transfer.data.articleData">
         <include refid="selectArticleData"/>
             left join reading_histories RH on RH.article_id = A.id
         where RH.user_id = #{userId}
         order by RH.last_read_at desc
+        limit #{page.limit} offset #{page.offset}
+    </select>
+    <select id="findRecentlyMostViewed" resultMap="transfer.data.articleData">
+        <include refid="selectArticleData"/>
+        where A.is_published is true
+        order by A.total_views desc, A.created_at desc
         limit #{page.limit} offset #{page.offset}
     </select>
 

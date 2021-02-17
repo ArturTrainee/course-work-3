@@ -36,6 +36,12 @@ public class ArticlesApi {
         this.articleQueryService = articleQueryService;
     }
 
+    @GetMapping(path = "trending")
+    public ResponseEntity<ArticleDataList> getTrending(@RequestParam(value = "offset", defaultValue = "0") int offset,
+                                                       @RequestParam(value = "limit", defaultValue = "5") int limit ) {
+        return ResponseEntity.ok(articleQueryService.findTrending(new Page(offset, limit)));
+    }
+
     @GetMapping(path = "feed")
     public ResponseEntity<ArticleDataList> getFeed(@RequestParam(value = "offset", defaultValue = "0") int offset,
                                                    @RequestParam(value = "limit", defaultValue = "20") int limit,
