@@ -1,6 +1,7 @@
 package io.spring.api;
 
-import io.spring.api.dto.UpdateArticleParam;
+import io.spring.api.dto.ArticleDraftingParams;
+import io.spring.api.dto.UpdatePublishedArticleParams;
 import io.spring.api.exception.NoAuthorizationException;
 import io.spring.api.exception.ResourceNotFoundException;
 import io.spring.application.ArticleQueryService;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.Map;
+
+import static io.spring.Constants.ARTICLE;
 
 @RestController
 @RequestMapping(path = "/articles/{slug}")
@@ -47,18 +50,31 @@ public class ArticleApi {
     @PutMapping
     public ResponseEntity<Map<String, ArticleData>> updateArticle(@PathVariable("slug") String slug,
                                                                   @AuthenticationPrincipal User user,
-                                                                  @Valid @RequestBody UpdateArticleParam updateArticleParam) {
-        return articleRepository.findBySlug(slug).map(article -> {
+                                                                  @Valid @RequestBody UpdatePublishedArticleParams updateParams) {
+        return this.articleRepository.findBySlug(slug).map(article -> {
             if (!AuthorizationService.canWriteArticle(user, article)) {
                 throw new NoAuthorizationException();
             }
-            article.update(updateArticleParam.getTitle(),
-                    updateArticleParam.getDescription(),
-                    updateArticleParam.getBody(),
-                    updateArticleParam.isPublished());
-            articleRepository.save(article);
-            return articleQueryService.findBySlug(slug, user)
+            article.update(updateParams.getTitle(), updateParams.getDescription(), updateParams.getBody(), true);
+            this.articleRepository.save(article);
+            return this.articleQueryService.findBySlug(article.getSlug(), user)
                     .map(a -> ResponseEntity.ok(Collections.singletonMap("article", a)))
+                    .orElseThrow(ResourceNotFoundException::new);
+        }).orElseThrow(ResourceNotFoundException::new);
+    }
+
+    @PutMapping("/draft")
+    public ResponseEntity<Map<String, ArticleData>> updateArticle(@PathVariable("slug") String slug,
+                                                                  @AuthenticationPrincipal User user,
+                                                                  @Valid @RequestBody ArticleDraftingParams updateParams) {
+        return this.articleRepository.findBySlug(slug).map(article -> {
+            if (!AuthorizationService.canWriteArticle(user, article)) {
+                throw new NoAuthorizationException();
+            }
+            article.update(updateParams.getTitle(), updateParams.getDescription(), updateParams.getBody(), false);
+            this.articleRepository.save(article);
+            return this.articleQueryService.findBySlug(article.getSlug(), user)
+                    .map(a -> ResponseEntity.ok(Collections.singletonMap(ARTICLE, a)))
                     .orElseThrow(ResourceNotFoundException::new);
         }).orElseThrow(ResourceNotFoundException::new);
     }

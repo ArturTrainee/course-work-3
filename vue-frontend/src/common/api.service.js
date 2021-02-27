@@ -66,7 +66,7 @@ export const ArticlesService = {
     return ApiService.put(`articles/${slug}`, { article: params });
   },
   updateDraft(slug, params) {
-    return ApiService.put(`articles/draft/${slug}`, { article: params });
+    return ApiService.put(`articles/${slug}/draft`, { article: params });
   },
   destroy(slug) {
     return ApiService.delete(`articles/${slug}`);

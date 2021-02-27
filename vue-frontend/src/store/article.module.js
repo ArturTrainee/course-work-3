@@ -40,8 +40,7 @@ const initialState = {
     title: "",
     description: "",
     body: "",
-    tagList: [],
-    isPublished: true
+    tagList: []
   },
   comments: [],
   likesInfo: {
@@ -136,9 +135,7 @@ export const mutations = {
     state.comments = comments;
   },
   [SET_LIKES](state, likesInfo) {
-    console.log('before', state.likesInfo, 'after', likesInfo);
     state.likesInfo = likesInfo;
-    console.log('before', state.likesInfo, 'after', likesInfo);
   },
   [TAG_ADD](state, tag) {
     state.article.tagList = state.article.tagList.concat([tag]);
