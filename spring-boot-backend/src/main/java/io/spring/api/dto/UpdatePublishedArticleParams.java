@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 @Getter
-@JsonRootName("article")
 @NoArgsConstructor
-public class ArticleCreationParams {
+@JsonRootName("article")
+public class UpdatePublishedArticleParams {
     @NotBlank(message = "can't be empty")
     private String title;
     @NotBlank(message = "can't be empty")
     private String description;
     @NotBlank(message = "can't be empty")
     private String body;
-    private String[] tagList;
 }

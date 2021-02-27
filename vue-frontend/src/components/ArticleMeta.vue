@@ -3,7 +3,7 @@
     <router-link
       :to="{ name: 'profile', params: { username: article.author.username } }"
     >
-      <img :src="article.author.image" />
+      <img :src="article.author.image" alt="author image"/>
     </router-link>
     <div class="info">
       <router-link
@@ -29,7 +29,7 @@
           'btn-outline-primary': !article.favorited
         }"
       >
-        <i class="ion-heart"></i>
+        <em class="ion-heart" />
         <span class="counter"> {{ article.favoritesCount }} </span>
       </button>
     </div>

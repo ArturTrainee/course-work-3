@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.spring.infrastructure.mybatis.mapper.ArticleReactionMapper">
+    <insert id="insert">
+        insert into reactions(id, article_id, user_id, is_liked)
+        values (#{id}, #{articleId}, #{userId}, #{isLike})
+    </insert>
+    <delete id="delete">
+        delete from reactions
+        where user_id = #{userId} and article_id = #{articleId}
+    </delete>
+    <select id="isReactionExists" resultType="java.lang.Boolean">
+        select exists(select 1 from reactions as R where R.user_id = #{userId} and R.article_id = #{articleId})
+    </select>
+    <select id="countArticleReactions" resultType="java.lang.Integer">
+        select count(*)
+        from reactions
+        where article_id = #{articleId}
+    </select>
+</mapper>

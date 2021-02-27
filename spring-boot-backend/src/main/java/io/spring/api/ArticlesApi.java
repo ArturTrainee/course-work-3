@@ -3,15 +3,11 @@ package io.spring.api;
 import io.spring.api.dto.ArticleCreationParams;
 import io.spring.api.dto.ArticleDraftingParams;
 import io.spring.api.exception.InvalidRequestException;
-import io.spring.api.exception.NoAuthorizationException;
-import io.spring.api.exception.ResourceNotFoundException;
 import io.spring.application.ArticleQueryService;
 import io.spring.application.Page;
-import io.spring.application.data.ArticleData;
 import io.spring.application.data.ArticleDataList;
 import io.spring.core.article.Article;
 import io.spring.core.article.ArticleRepository;
-import io.spring.core.service.AuthorizationService;
 import io.spring.core.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +19,13 @@ import javax.validation.Valid;
 import java.util.Collections;
 import java.util.Map;
 
+import static io.spring.Constants.ARTICLE;
+
 @RestController
 @RequestMapping(path = "/articles")
 public class ArticlesApi {
     private final ArticleRepository articleRepository;
     private final ArticleQueryService articleQueryService;
-    private static final String ARTICLE = "article";
 
     @Autowired
     public ArticlesApi(ArticleRepository articleRepository, ArticleQueryService articleQueryService) {
@@ -67,15 +64,19 @@ public class ArticlesApi {
         if (bindingResult.hasErrors()) {
             throw new InvalidRequestException(bindingResult);
         }
-        if (articleQueryService.findBySlug(Article.toSlug(articleParams.getTitle()), null).isPresent()) {
+        if (this.articleQueryService.findBySlug(Article.toSlug(articleParams.getTitle()), null).isPresent()) {
             bindingResult.rejectValue("title", "DUPLICATED", "article name exists");
             throw new InvalidRequestException(bindingResult);
         }
-        final var article = new Article(articleParams.getTitle(), articleParams.getDescription(),
-                articleParams.getBody(), articleParams.getTagList(), user.getId(), articleParams.isPublished()
+        final var article = new Article(
+                articleParams.getTitle(),
+                articleParams.getDescription(),
+                articleParams.getBody(),
+                articleParams.getTagList(),
+                user.getId()
         );
-        articleRepository.save(article);
-        return articleQueryService.findById(article.getId(), user)
+        this.articleRepository.save(article);
+        return this.articleQueryService.findById(article.getId(), user)
                 .<ResponseEntity<Map<String, Object>>>map(a -> ResponseEntity.ok(Collections.singletonMap(ARTICLE, a)))
                 .orElseGet(() -> ResponseEntity.badRequest().body(Collections.emptyMap()));
     }
@@ -91,9 +92,13 @@ public class ArticlesApi {
             bindingResult.rejectValue("title", "DUPLICATED", "article name exists");
             throw new InvalidRequestException(bindingResult);
         }
-        final String title = articleParams.getTitle();
-        final var article = new Article(title, articleParams.getDescription(), articleParams.getBody(),
-                articleParams.getTagList(), user.getId(), false
+        final var article = new Article(
+                articleParams.getTitle(),
+                articleParams.getDescription(),
+                articleParams.getBody(),
+                articleParams.getTagList(),
+                user.getId(),
+                false
         );
         articleRepository.save(article);
         return articleQueryService.findById(article.getId(), user)
@@ -101,20 +106,4 @@ public class ArticlesApi {
                 .orElseGet(() -> ResponseEntity.badRequest().body(Collections.emptyMap()));
     }
 
-    @PutMapping("/draft/{slug}")
-    public ResponseEntity<Map<String, ArticleData>> updateArticle(@PathVariable("slug") String slug,
-                                                                  @AuthenticationPrincipal User user,
-                                                                  @Valid @RequestBody ArticleDraftingParams articleParams) {
-        return articleRepository.findBySlug(slug).map(article -> {
-            if (!AuthorizationService.canWriteArticle(user, article)) {
-                throw new NoAuthorizationException();
-            }
-            article.update(articleParams.getTitle(), articleParams.getDescription(), articleParams.getBody(), false);
-            articleRepository.save(article);
-            return articleQueryService.findBySlug(slug, user)
-                    .map(a -> ResponseEntity.ok(Collections.singletonMap(ARTICLE, a)))
-                    .orElseThrow(ResourceNotFoundException::new);
-        }).orElseThrow(ResourceNotFoundException::new);
-    }
-    
 }

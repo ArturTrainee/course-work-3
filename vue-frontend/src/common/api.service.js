@@ -66,7 +66,7 @@ export const ArticlesService = {
     return ApiService.put(`articles/${slug}`, { article: params });
   },
   updateDraft(slug, params) {
-    return ApiService.put(`articles/draft/${slug}`, { article: params });
+    return ApiService.put(`articles/${slug}/draft`, { article: params });
   },
   destroy(slug) {
     return ApiService.delete(`articles/${slug}`);
@@ -98,5 +98,17 @@ export const FavoriteService = {
   },
   remove(slug) {
     return ApiService.delete(`articles/${slug}/favorite`);
+  }
+};
+
+export const LikesService = {
+  get(slug) {
+    return ApiService.get(`articles/${slug}/likes`);
+  },
+  add(slug) {
+    return ApiService.post(`articles/${slug}/likes`);
+  },
+  remove(slug) {
+    return ApiService.delete(`articles/${slug}/likes`);
   }
 };

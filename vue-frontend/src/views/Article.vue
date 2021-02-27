@@ -3,6 +3,14 @@
     <div class="banner">
       <div class="container">
         <h1>{{ article.title }}</h1>
+        <button
+          class="btn btn-sm pull-xs-right"
+          @click="toggleLike"
+          :class="this.likesInfo.alreadyLiked ? 'btn-primary' : 'btn-outline-primary'"
+        >
+          <em class="ion-thumbsup" />
+          <span class="counter"> {{ likesInfo.count || 0 }}</span>
+        </button>
         <RwvArticleMeta :article="article" :actions="true"></RwvArticleMeta>
       </div>
     </div>
@@ -59,7 +67,7 @@ import RwvArticleMeta from "@/components/ArticleMeta";
 import RwvComment from "@/components/Comment";
 import RwvCommentEditor from "@/components/CommentEditor";
 import RwvTag from "@/components/VTag";
-import { FETCH_ARTICLE, FETCH_COMMENTS } from "@/store/actions.type";
+import { FETCH_ARTICLE, FETCH_COMMENTS, FETCH_LIKES, LIKE_ADD, LIKE_REMOVE } from "@/store/actions.type";
 
 export default {
   name: "rwv-article",
@@ -84,12 +92,23 @@ export default {
     });
   },
   computed: {
-    ...mapGetters(["article", "currentUser", "comments", "isAuthenticated"])
+    ...mapGetters(["article", "currentUser", "comments", "isAuthenticated", "likesInfo"])
   },
   methods: {
     parseMarkdown(content) {
       return marked(content);
+    },
+    toggleLike() {
+      if (!this.isAuthenticated) {
+        this.$router.push({ name: "login" });
+        return;
+      }
+      const action = this.likesInfo.alreadyLiked ? LIKE_REMOVE : LIKE_ADD;
+      this.$store.dispatch(action, this.$route.params.slug);
     }
+  },
+  mounted() {
+    this.$store.dispatch(FETCH_LIKES, this.$route.params.slug);
   }
 };
 </script>
