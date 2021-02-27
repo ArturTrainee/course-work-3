@@ -59,12 +59,13 @@
               :disabled="!(article.title && article.description && article.body) || inProgress"
               class="btn btn-lg pull-xs-right btn-success"
               type="submit"
+              style="margin-left: 10px;"
             >
               Publish Article
             </button>
             <button
               :disabled="!article.title || inProgress"
-              class="btn btn-lg pull-xs-right btn-primary"
+              class="btn btn-lg pull-xs-right btn-warning"
               type="button"
               @click="onSaveArticleDraft(article.slug)"
             >
@@ -135,27 +136,15 @@ export default {
   },
   methods: {
     onPublish(slug) {
-      console.log(slug);
       let action = slug ? ARTICLE_EDIT : ARTICLE_PUBLISH;
-      this.inProgress = true;
-      this.$store
-        .dispatch(action)
-        .then(({ data }) => {
-          this.inProgress = false;
-          this.$router.push({
-            name: "article",
-            params: { slug: data.article.slug }
-          });
-        })
-        .catch(({ response }) => {
-          this.inProgress = false;
-          this.errors = response.data.errors;
-        });
+      this.createAndRedirectToArticle(action);
     },
     onSaveArticleDraft(slug) {
-      console.log(slug);
       let action = slug ? ARTICLE_EDIT_DRAFT : ARTICLE_CREATE_DRAFT;
-      this.article.isPublished = false;
+      this.createAndRedirectToArticle(action);
+    },
+    createAndRedirectToArticle(action) {
+      console.log(this.article);
       this.inProgress = true;
       this.$store
         .dispatch(action)
