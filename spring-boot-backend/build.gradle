@@ -49,4 +49,5 @@ flyway {
     url = "jdbc:postgresql://localhost:5432/smartreads"
     user = "postgres"
     password = "admin"
+    baselineOnMigrate = true
 }
