@@ -2,7 +2,8 @@ import Vue from "vue";
 import {
   ArticlesService,
   CommentsService,
-  FavoriteService
+  FavoriteService,
+  LikesService
 } from "@/common/api.service";
 import {
   FETCH_ARTICLE,
@@ -11,6 +12,8 @@ import {
   COMMENT_DESTROY,
   FAVORITE_ADD,
   FAVORITE_REMOVE,
+  LIKE_ADD,
+  LIKE_REMOVE,
   ARTICLE_PUBLISH,
   ARTICLE_EDIT,
   ARTICLE_EDIT_ADD_TAG,
@@ -18,12 +21,14 @@ import {
   ARTICLE_DELETE,
   ARTICLE_RESET_STATE,
   ARTICLE_CREATE_DRAFT,
-  ARTICLE_EDIT_DRAFT
+  ARTICLE_EDIT_DRAFT,
+  FETCH_LIKES
 } from "./actions.type";
 import {
   RESET_STATE,
   SET_ARTICLE,
   SET_COMMENTS,
+  SET_LIKES,
   TAG_ADD,
   TAG_REMOVE,
   UPDATE_ARTICLE_IN_LIST
@@ -38,7 +43,11 @@ const initialState = {
     tagList: [],
     isPublished: true
   },
-  comments: []
+  comments: [],
+  likesInfo: {
+    count: 0,
+    alreadyLiked: false
+  }
 };
 
 export const state = { ...initialState };
@@ -77,6 +86,21 @@ export const actions = {
     context.commit(UPDATE_ARTICLE_IN_LIST, data.article, { root: true });
     context.commit(SET_ARTICLE, data.article);
   },
+  async [FETCH_LIKES](context, slug) {
+    const { data } = await LikesService.get(slug);
+    context.commit(SET_LIKES, data);
+    return data;
+  },
+  async [LIKE_ADD](context, slug) {
+    await LikesService.add(slug);
+    const { data } = await LikesService.get(slug);
+    context.commit(SET_LIKES, data);
+  },
+  async [LIKE_REMOVE](context, slug) {
+    await LikesService.remove(slug);
+    const { data } = await LikesService.get(slug);
+    context.commit(SET_LIKES, data);
+  },
   [ARTICLE_PUBLISH]({ state }) {
     return ArticlesService.create(state.article);
   },
@@ -111,6 +135,11 @@ export const mutations = {
   [SET_COMMENTS](state, comments) {
     state.comments = comments;
   },
+  [SET_LIKES](state, likesInfo) {
+    console.log('before', state.likesInfo, 'after', likesInfo);
+    state.likesInfo = likesInfo;
+    console.log('before', state.likesInfo, 'after', likesInfo);
+  },
   [TAG_ADD](state, tag) {
     state.article.tagList = state.article.tagList.concat([tag]);
   },
@@ -130,6 +159,9 @@ const getters = {
   },
   comments(state) {
     return state.comments;
+  },
+  likesInfo(state) {
+    return state.likesInfo;
   }
 };
 

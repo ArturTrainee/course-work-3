@@ -100,3 +100,15 @@ export const FavoriteService = {
     return ApiService.delete(`articles/${slug}/favorite`);
   }
 };
+
+export const LikesService = {
+  get(slug) {
+    return ApiService.get(`articles/${slug}/likes`);
+  },
+  add(slug) {
+    return ApiService.post(`articles/${slug}/likes`);
+  },
+  remove(slug) {
+    return ApiService.delete(`articles/${slug}/likes`);
+  }
+};
