@@ -10,6 +10,7 @@ import io.spring.core.article.ArticleRepository;
 import io.spring.core.service.AuthorizationService;
 import io.spring.core.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/articles/{slug}")
@@ -37,18 +37,17 @@ public class ArticleApi {
     @GetMapping
     public ResponseEntity<Map<String, ArticleData>> article(@PathVariable("slug") String slug,
                                                             @AuthenticationPrincipal User user) {
-        return this.articleQueryService.findBySlug(slug, user).map(article-> {
-            if (user != null) {
-                this.articleViewsHistoryService.save(user.getId(), article.getId());
-            }
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return this.articleQueryService.findBySlug(slug, user).map(article -> {
+            this.articleViewsHistoryService.save(user.getId(), article.getId());
             return ResponseEntity.ok(Collections.singletonMap("article", article));
         }).orElseThrow(ResourceNotFoundException::new);
     }
 
     @PutMapping
     public ResponseEntity<Map<String, ArticleData>> updateArticle(@PathVariable("slug") String slug,
-                                                             @AuthenticationPrincipal User user,
-                                                             @Valid @RequestBody UpdateArticleParam updateArticleParam) {
+                                                                  @AuthenticationPrincipal User user,
+                                                                  @Valid @RequestBody UpdateArticleParam updateArticleParam) {
         return articleRepository.findBySlug(slug).map(article -> {
             if (!AuthorizationService.canWriteArticle(user, article)) {
                 throw new NoAuthorizationException();
@@ -75,5 +74,4 @@ public class ArticleApi {
             return ResponseEntity.noContent().build();
         }).orElseThrow(ResourceNotFoundException::new);
     }
-
 }

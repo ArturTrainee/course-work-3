@@ -39,7 +39,7 @@ public class ArticleQueryService {
 
     public Optional<ArticleData> findBySlug(String slug, User user) {
         final ArticleData articleData = articleReadService.findBySlug(slug);
-        return (articleData != null && user != null)
+        return (articleData != null)
                 ? Optional.of(addUserInfo(articleData.getId(), user, articleData))
                 : Optional.empty();
     }
