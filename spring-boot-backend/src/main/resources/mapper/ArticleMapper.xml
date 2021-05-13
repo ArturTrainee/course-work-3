@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.spring.infrastructure.mybatis.mapper.ArticleMapper">
-    <insert id="insert">
+    <select id="insert" resultType="String">
         insert into articles(id, slug, title, description, body, user_id, created_at, updated_at, is_published)
         values(
           #{article.id},
@@ -13,13 +13,8 @@
           #{article.createdAt},
           #{article.updatedAt},
           #{article.isPublished})
-    </insert>
-    <insert id="insertTag">
-        insert into tags (id, name) values (#{tag.id}, #{tag.name})
-    </insert>
-    <insert id="insertArticleTagRelation">
-        insert into article_tags (article_id, tag_id) values(#{articleId}, #{tagId})
-    </insert>
+        returning id
+    </select>
     <update id="update">
         update articles
         set is_published = #{article.isPublished}
@@ -49,16 +44,13 @@
             left join article_tags AT on A.id = AT.article_id
             left join tags T on T.id = AT.tag_id
     </sql>
-
     <select id="findById" resultMap="article">
         <include refid="selectArticle"/>
         where A.id = #{id}
     </select>
-
-    <select id="findTag" resultType="io.spring.core.article.Tag">
-        select id, name from tags where name = #{tagName}
+    <select id="isArticleExists" resultType="java.lang.Boolean">
+        select exists(select 1 from articles as A where A.slug = #{slug})
     </select>
-
     <select id="findBySlug" resultMap="article">
         <include refid="selectArticle"/>
         where A.slug = #{slug}

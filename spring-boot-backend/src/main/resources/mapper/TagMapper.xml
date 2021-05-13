@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.spring.infrastructure.mybatis.mapper.TagMapper">
+    <insert id="insertTag">
+        insert into tags (id, name) values (#{tag.id}, #{tag.name})
+        on conflict (name)
+        do update set id = #{tag.id}, name = #{tag.name}
+    </insert>
+    <insert id="insertTags">
+        insert into tags (id, name)
+        values
+        <foreach collection="tags" item="tag" separator=",">
+            (#{tag.id}, #{tag.name})
+        </foreach>
+    </insert>
+    <insert id="insertArticleTagRelation">
+        insert into article_tags (article_id, tag_id) values(#{articleId}, #{tagId})
+        on conflict do nothing
+    </insert>
+    <insert id="insertArticleTagsRelations">
+        insert into article_tags (article_id, tag_id)
+        values
+        <foreach collection="tags" item="tag" separator="," close=" ">
+            (#{articleId}, #{tag.id})
+        </foreach>
+        on conflict do nothing
+    </insert>
+    <select id="isTagExists" resultType="java.lang.Boolean">
+        select exists(
+                       select 1
+                       from tags as T
+                       where T.name = #{tagName}
+                   )
+    </select>
+    <select id="findTagByName" resultType="io.spring.core.article.Tag">
+        select id, name from tags where name = #{tagName}
+    </select>
+    <select id="findTagById" resultType="io.spring.core.article.Tag">
+        select id, name from tags where id = #{tagId}
+    </select>
+    <select id="findTagsByArticleId" resultMap="tagsList">
+        select distinct id, name
+        from tags
+            inner join article_tags AT on AT.article_id = #{articleId}
+    </select>
+    <delete id="removeArticleTagRelation">
+        delete from article_tags where article_id = #{articleId} and tag_id = #{tagId}
+    </delete>
+    <delete id="removeArticleTagsRelations">
+        delete from article_tags
+        where article_id = #{articleId}
+        <foreach collection="tags" item="tag" open="and " separator="or">
+            tag_id = #{tag.id}
+        </foreach>
+    </delete>
+    <delete id="delete">
+        delete from tags where id = #{id}
+    </delete>
+
+    <resultMap id="tagsList" type="io.spring.core.article.TagsList">
+        <collection property="tagsList" ofType="arraylist" resultMap="tag"/>
+    </resultMap>
+    <resultMap id="tag" type="io.spring.core.article.Tag">
+        <id column="tagId" property="id"/>
+        <result column="tagName" property="name"/>
+    </resultMap>
+</mapper>

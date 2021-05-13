@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -57,7 +58,7 @@ public class MyBatisArticleRepositoryTest {
         articleRepository.save(article);
 
         String newTitle = "new test 2";
-        article.update(newTitle, "", "", true);
+        article.update(newTitle, "", "", true, Collections.emptyList());
         articleRepository.save(article);
         System.out.println(article.getSlug());
         Optional<Article> optional = articleRepository.findBySlug(article.getSlug());

@@ -117,13 +117,13 @@ public class ArticleApiTest extends TestWithCurrentUser {
         Article article = new Article(title, description, body, new String[]{"java", "spring", "jpg"}, anotherUser.getId());
 
         DateTime time = new DateTime();
-        ArticleData articleData = new ArticleData(
-            article.getId(),
+        ArticleData articleData = new ArticleData(article.getId(),
             article.getSlug(),
             article.getTitle(),
             article.getDescription(),
             article.getBody(),
             false,
+            true,
             0,
             time,
             time,

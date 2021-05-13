@@ -5,6 +5,7 @@ import io.spring.core.article.ArticleRepository;
 import io.spring.core.user.User;
 import io.spring.core.user.UserRepository;
 import io.spring.infrastructure.mybatis.mapper.ArticleMapper;
+import io.spring.infrastructure.mybatis.mapper.TagMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class ArticleRepositoryTransactionTest {
     @Autowired
     private ArticleMapper articleMapper;
 
+    @Autowired
+    private TagMapper tagMapper;
+
 
     @Test
     public void transactional_test() {
@@ -39,7 +43,7 @@ public class ArticleRepositoryTransactionTest {
         try {
             articleRepository.save(anotherArticle);
         } catch (Exception e) {
-            assertNull(articleMapper.findTag("other").get());
+            assertNull(tagMapper.findTagByName("other").get());
         }
     }
 

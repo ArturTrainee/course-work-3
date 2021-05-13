@@ -32,15 +32,15 @@
         select * from users where username = #{username}
     </select>
     <select id="findByEmail" resultMap="user">
-        select id, username, email, password, bio, image from users where email = #{email}
+        select id, username, email, password, bio, image
+        from users
+        where email = #{email}
     </select>
     <select id="findById" resultMap="user">
         select id, username, email, password, bio, image from users where id = #{id}
     </select>
     <select id="findRelation" resultMap="follow">
-        SELECT
-          F.user_id followUserId,
-          F.follow_id followTargetId
+        select F.user_id followUserId, F.follow_id followTargetId
         from follows F
         where F.user_id = #{userId} and F.follow_id = #{targetId}
     </select>
