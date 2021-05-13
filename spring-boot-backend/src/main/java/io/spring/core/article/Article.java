@@ -1,8 +1,6 @@
 package io.spring.core.article;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.joda.time.DateTime;
 
 import java.util.Arrays;
@@ -17,6 +15,7 @@ import static java.util.stream.Collectors.toSet;
 @EqualsAndHashCode(of = {"id"})
 public class Article {
     private String userId;
+    @Setter
     private String id;
     private String slug;
     private String title;
@@ -60,7 +59,7 @@ public class Article {
         this.isPublished = isPublished;
     }
 
-    public void update(String title, String description, String body, boolean isPublished) {
+    public void update(String title, String description, String body, boolean isPublished, List<Tag> tags) {
         this.isPublished = isPublished;
         if (!title.equals(EMPTY_STRING)) {
             this.title = title;
@@ -71,6 +70,9 @@ public class Article {
         }
         if (!body.equals(EMPTY_STRING)) {
             this.body = body;
+        }
+        if (!tags.isEmpty()) {
+            this.tags = tags;
         }
         this.updatedAt = new DateTime();
     }

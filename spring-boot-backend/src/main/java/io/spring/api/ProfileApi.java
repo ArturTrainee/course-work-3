@@ -46,9 +46,6 @@ public class ProfileApi {
                                                       @RequestParam(value = "offset", defaultValue = "0") int offset,
                                                       @RequestParam(value = "limit", defaultValue = "20") int limit,
                                                       @AuthenticationPrincipal User user) {
-        if (!user.getUsername().equals(username)) {
-            throw new NoAuthorizationException();
-        }
         return ResponseEntity.ok(articleQueryService.findByUserViews(user, new Page(offset, limit)));
     }
 

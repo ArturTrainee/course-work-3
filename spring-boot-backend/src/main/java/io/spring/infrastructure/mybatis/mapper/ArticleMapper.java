@@ -1,7 +1,6 @@
 package io.spring.infrastructure.mybatis.mapper;
 
 import io.spring.core.article.Article;
-import io.spring.core.article.Tag;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -9,15 +8,11 @@ import java.util.Optional;
 
 @Mapper
 public interface ArticleMapper {
-    void insert(@Param("article") Article article);
+    String insert(@Param("article") Article article);
 
     Optional<Article> findById(@Param("id") String id);
 
-    Optional<Tag> findTag(@Param("tagName") String tagName);
-
-    void insertTag(@Param("tag") Tag tag);
-
-    void insertArticleTagRelation(@Param("articleId") String articleId, @Param("tagId") String tagId);
+    boolean isArticleExists(@Param("slug") String slug);
 
     Optional<Article> findBySlug(@Param("slug") String slug);
 

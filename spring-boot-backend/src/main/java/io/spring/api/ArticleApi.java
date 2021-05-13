@@ -8,6 +8,7 @@ import io.spring.application.ArticleQueryService;
 import io.spring.application.ArticleViewsHistoryService;
 import io.spring.application.data.ArticleData;
 import io.spring.core.article.ArticleRepository;
+import io.spring.core.article.Tag;
 import io.spring.core.service.AuthorizationService;
 import io.spring.core.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static io.spring.Constants.ARTICLE;
+import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping(path = "/articles/{slug}")
@@ -55,7 +59,10 @@ public class ArticleApi {
             if (!AuthorizationService.canWriteArticle(user, article)) {
                 throw new NoAuthorizationException();
             }
-            article.update(updateParams.getTitle(), updateParams.getDescription(), updateParams.getBody(), true);
+            final List<Tag> tags = Arrays.stream(updateParams.getTagList())
+                    .map(Tag::new)
+                    .collect(toList());
+            article.update(updateParams.getTitle(), updateParams.getDescription(), updateParams.getBody(), true, tags);
             this.articleRepository.save(article);
             return this.articleQueryService.findBySlug(article.getSlug(), user)
                     .map(a -> ResponseEntity.ok(Collections.singletonMap("article", a)))
@@ -71,7 +78,10 @@ public class ArticleApi {
             if (!AuthorizationService.canWriteArticle(user, article)) {
                 throw new NoAuthorizationException();
             }
-            article.update(updateParams.getTitle(), updateParams.getDescription(), updateParams.getBody(), false);
+            final List<Tag> tags = Arrays.stream(updateParams.getTagList())
+                    .map(Tag::new)
+                    .collect(toList());
+            article.update(updateParams.getTitle(), updateParams.getDescription(), updateParams.getBody(), false, tags);
             this.articleRepository.save(article);
             return this.articleQueryService.findBySlug(article.getSlug(), user)
                     .map(a -> ResponseEntity.ok(Collections.singletonMap(ARTICLE, a)))
